@@ -1485,29 +1485,43 @@ ifneq ($(TARGET_NO_SEPARATE_RECOVERY),)
     $(INTERNAL_OTA_PACKAGE_TARGET): separate_recovery := --no_separate_recovery=true
 endif
 
+BOOT_ZIP_FROM_IMAGE_SCRIPT := ./build/tools/releasetools/boot_flash_from_image
+KERNEL_PATH := $(TARGET_KERNEL_SOURCE)/arch/arm/configs/$(TARGET_KERNEL_CONFIG)
+
+CUSTOM_TARGET_PACKAGE := $(PRODUCT_OUT)/nameless-$(ROM_VERSION).zip
+
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	@echo -e ${CL_YLW}"Package OTA:"${CL_RST}" $@"
 	MKBOOTIMG=$(BOARD_CUSTOM_BOOTIMG_MK) \
 	$(OTA_FROM_TARGET_SCRIPT) -v \
-	   -p $(HOST_OUT) \
-	   -k $(KEY_CERT_PAIR) \
-	   --backup=$(backuptool) \
-	   --override_device=$(override_device) \
-	   $(override_prop) \
-	   $(separate_recovery) \
-	   $(BUILT_TARGET_FILES_PACKAGE) $@
-
-AOGP_TARGET_PACKAGE := $(PRODUCT_OUT)/$(AOGP_VERSION).zip
+		-p $(HOST_OUT) \
+		-k $(KEY_CERT_PAIR) \
+		--backup=$(backuptool) \
+		--override_device=$(override_device) $(override_prop) \
+		$(BUILT_TARGET_FILES_PACKAGE) $@
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CUSTOM_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(CUSTOM_TARGET_PACKAGE) > $(CUSTOM_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_YLW}"Running squisher:"${CL_RST}
+	$(hide) ./vendor/nameless/tools/squisher $(CUSTOM_TARGET_PACKAGE)
+ifneq ($(BUILD_IS_JENKINS),)
+	@echo -e
+	@echo -e ${CL_YLW}"Creating Changelog"${CL_RST}
+	@echo -e
+	$(hide) ./vendor/nameless/tools/changelog_creator.sh $(CUSTOM_TARGET_PACKAGE)
+	@echo -e
+endif
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
+bootzip: bootimage
+	$(BOOT_ZIP_FROM_IMAGE_SCRIPT) \
+	   $(recovery_fstab) \
+	   $(OUT) \
+	   $(TARGET_DEVICE)
 ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 	$(error TARGET_CUSTOM_RELEASETOOL is deprecated)
 endif
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(AOGP_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(AOGP_TARGET_PACKAGE) > $(AOGP_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_CYN}"Package Complete: $(AOGP_TARGET_PACKAGE)"${CL_RST}
 
 # -----------------------------------------------------------------
 # The update package
