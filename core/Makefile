@@ -1501,6 +1501,14 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 		$(BUILT_TARGET_FILES_PACKAGE) $@
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CUSTOM_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(CUSTOM_TARGET_PACKAGE) > $(CUSTOM_TARGET_PACKAGE).md5sum
+	
+ifeq ($(USE_PREBUILT_CHROMIUM),1)
+ifneq ($(PRODUCT_PREBUILT_WEBVIEWCHROMIUM),yes)
+	@echo "Running Chromium prebuilt setup script..."
+	$(hide) . $(TOPDIR)vendor/aogp/chromium_prebuilt.sh $(TOP)
+endif
+endif
+
 	@echo -e ${CL_YLW}"Running squisher:"${CL_RST}
 	$(hide) ./vendor/aogp/tools/squisher $(CUSTOM_TARGET_PACKAGE)
 ifneq ($(BUILD_IS_JENKINS),)
