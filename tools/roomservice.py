@@ -222,7 +222,7 @@ def parse_device_from_folder(device):
 
 
 def parse_dependency_file(location):
-    dep_file = "cm.dependencies"
+    dep_file = "aogp.dependencies"
     dep_location = '/'.join([location, dep_file])
     if not os.path.isfile(dep_location):
         print("WARNING: %s file not found" % dep_location)
