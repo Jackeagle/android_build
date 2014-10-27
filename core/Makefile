@@ -1488,7 +1488,7 @@ endif
 BOOT_ZIP_FROM_IMAGE_SCRIPT := ./build/tools/releasetools/boot_flash_from_image
 KERNEL_PATH := $(TARGET_KERNEL_SOURCE)/arch/arm/configs/$(TARGET_KERNEL_CONFIG)
 
-CUSTOM_TARGET_PACKAGE := $(PRODUCT_OUT)/nameless-$(ROM_VERSION).zip
+CUSTOM_TARGET_PACKAGE := $(PRODUCT_OUT)/$(AOGP_VERSION).zip
 
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	@echo -e ${CL_YLW}"Package OTA:"${CL_RST}" $@"
@@ -1502,12 +1502,12 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CUSTOM_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(CUSTOM_TARGET_PACKAGE) > $(CUSTOM_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_YLW}"Running squisher:"${CL_RST}
-	$(hide) ./vendor/nameless/tools/squisher $(CUSTOM_TARGET_PACKAGE)
+	$(hide) ./vendor/aogp/tools/squisher $(CUSTOM_TARGET_PACKAGE)
 ifneq ($(BUILD_IS_JENKINS),)
 	@echo -e
 	@echo -e ${CL_YLW}"Creating Changelog"${CL_RST}
 	@echo -e
-	$(hide) ./vendor/nameless/tools/changelog_creator.sh $(CUSTOM_TARGET_PACKAGE)
+	$(hide) ./vendor/aogp/tools/changelog_creator.sh $(CUSTOM_TARGET_PACKAGE)
 	@echo -e
 endif
 
