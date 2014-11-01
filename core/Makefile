@@ -1509,27 +1509,14 @@ ifneq ($(PRODUCT_PREBUILT_WEBVIEWCHROMIUM),yes)
 endif
 endif
 
-	@echo -e ${CL_YLW}"Running squisher:"${CL_RST}
-	$(hide) ./vendor/aogp/tools/squisher $(CUSTOM_TARGET_PACKAGE)
-ifneq ($(BUILD_IS_JENKINS),)
-	@echo -e
-	@echo -e ${CL_YLW}"Creating Changelog"${CL_RST}
-	@echo -e
-	$(hide) ./vendor/aogp/tools/changelog_creator.sh $(CUSTOM_TARGET_PACKAGE)
-	@echo -e
-endif
-
-.PHONY: otapackage bacon
+.PHONY: otapackage aogp
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
-bootzip: bootimage
-	$(BOOT_ZIP_FROM_IMAGE_SCRIPT) \
-	   $(recovery_fstab) \
-	   $(OUT) \
-	   $(TARGET_DEVICE)
 ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 	$(error TARGET_CUSTOM_RELEASETOOL is deprecated)
 endif
+	@echo -e ${CL_YLW}"Running vendor releasetool..."${CL_RST}
+	$(hide) OTAPACKAGE=$(INTERNAL_OTA_PACKAGE_TARGET) APKCERTS=$(APKCERTS_FILE) ./vendor/aogp/tools/squisher
 
 # -----------------------------------------------------------------
 # The update package
